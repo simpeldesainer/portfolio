@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Documents</title>
+  <style>
+    :root {
+      --bg: #f5f5f2;
+      --card: #fff;
+      --text: #202020;
+      --muted: #777;
+      --line: #deded8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 48px));
+      margin: auto;
+      padding: 72px 0;
+    }
+
+    header { margin-bottom: 42px; }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 54px);
+      font-weight: 400;
+      letter-spacing: -.035em;
+    }
+
+    .intro {
+      max-width: 620px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .pdf-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .pdf-card {
+      display: block;
+      background: var(--card);
+      border: 1px solid var(--line);
+      color: inherit;
+      text-decoration: none;
+      overflow: hidden;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .pdf-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 14px 35px rgba(0,0,0,.08);
+    }
+
+    .thumbnail {
+      aspect-ratio: 4 / 3;
+      background: #ecece8;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .placeholder {
+      width: 100%;
+      height: 100%;
+      display: grid;
+      place-items: center;
+      color: #999;
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .info { padding: 17px 18px 20px; }
+
+    .number {
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    .title {
+      font-size: 16px;
+      margin-bottom: 7px;
+    }
+
+    .open {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 900px) {
+      .pdf-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 28px, 560px);
+        padding: 42px 0;
+      }
+      .pdf-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <header>
+      <div class="eyebrow">PDF Library</div>
+      <h1>Project Documents</h1>
+      <p class="intro">Select a document below to open the full PDF.</p>
+    </header>
+
+    <section class="pdf-grid" id="pdfGrid"></section>
+  </main>
+
+  <script>
+    /*
+      ============================================================
+      EDIT ONLY THIS SECTION
+      ============================================================
+
+      For each PDF, paste the COMPLETE Google Drive URL.
+
+      Example:
+      https://drive.google.com/file/d/1ABC123XYZ/view?usp=sharing
+
+      The website uses that URL for the PDF button.
+      It also extracts the Drive file ID automatically to request
+      a thumbnail generated from the first page of the PDF.
+
+      The PDF must be shared so the intended visitors can view it.
+    */
+
+    const PDFs = [
+      {
+        title: "Project 01",
+        url: "https://drive.google.com/file/d/10uyOrFSpNrU8Mvc-esbG7ObIA4FD-2fa/view?usp=sharing"
+      },
+      {
+        title: "Project 02",
+        url: "https://drive.google.com/file/d/1Lo6UnWxlgTSBTxUPWlfBu3vcFm6ZvPe2/view?usp=sharing"
+      },
+      {
+        title: "Project 03",
+        url: ""
+      },
+      {
+        title: "Project 04",
+        url: ""
+      }
+    ];
+
+    function getDriveFileId(url) {
+      const match = url.match(/\/file\/d\/([^/]+)/);
+      return match ? match[1] : "";
+    }
+
+    // Google Drive's thumbnail endpoint normally returns a preview
+    // generated from the first page of a PDF.
+    function driveThumbnail(url) {
+      const id = getDriveFileId(url);
+      return id
+        ? `https://drive.google.com/thumbnail?id=${encodeURIComponent(id)}&sz=w1200`
+        : "";
+    }
+
+    function renderPDFs() {
+      const grid = document.getElementById("pdfGrid");
+
+      grid.innerHTML = PDFs
+        .filter(pdf => pdf.url)
+        .map((pdf, index) => `
+          <a class="pdf-card"
+             href="${pdf.url}"
+             target="_blank"
+             rel="noopener noreferrer">
+
+            <div class="thumbnail">
+              <img src="${driveThumbnail(pdf.url)}"
+                   alt="${pdf.title}"
+                   loading="lazy"
+                   onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';">
+              <div class="placeholder" style="display:none;">PDF Preview</div>
+            </div>
+
+            <div class="info">
+              <div class="number">${String(index + 1).padStart(2, "0")}</div>
+              <div class="title">${pdf.title}</div>
+              <div class="open">Open PDF →</div>
+            </div>
+          </a>
+        `)
+        .join("");
+    }
+
+    renderPDFs();
+  </script>
+</body>
+</html>
